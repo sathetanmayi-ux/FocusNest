@@ -1,50 +1,129 @@
-package com.example.dailydoc;
+📱 DailyDoc – Focus & Productivity App
+A distraction-blocking Android app designed to help users stay productive by using timer-based focus sessions, screen pinning, and password-protected emergency exit.
 
-import static androidx.core.content.ContextCompat.startActivity;
+🚀 Overview
+DailyDoc is a productivity application that helps users stay focused by temporarily blocking access to other apps during a focus session. It uses:
+1.Android Screen Pinning
+2.Foreground Services
+3.AlarmManager Scheduling
+Sh4.aredPreferences for secure local data storage
+The app also features a reward system, motivational toasts, and allows users to schedule focus sessions for later.
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.provider.Settings;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Toast;
-import androidx.appcompat.app.AppCompatActivity;
+🎯 Key Features
 
-public class MainActivity extends AppCompatActivity {
+🔐 1. Login with Password Setup
+-When the app is opened for the first time, the user must:
+-Enter Name
+-Set a Password
+-This password is required for the emergency stop feature during a focus session.
 
-    EditText inputMinutes;
-    Button btnStart, btnHistory;
+🏠 2. Home Screen
+-After login, users are greeted with:
+-A “Hello, {username}” message
+-Buttons for:
+   ➕ Add Task / Start Focus
+   🔑 Change Password
+   🏆 View Rewards
+The UI uses a modern Material Design layout.
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        inputMinutes = findViewById(R.id.inputMinutes);
-        btnStart = findViewById(R.id.btnStart);
-        btnHistory = findViewById(R.id.btnHistory);
+⏱️ 3. Start Focus Now
+-User selects a duration in minutes → focus session starts immediately.
+-During a focus session:
+    ~The screen becomes pinned
+    ~The user cannot press:
+        Back
+        Home
+        Recent Apps
+-A stylish countdown timer + progress bar appear
+-Motivational toasts pop up periodically
+-Emergency Stop requires entering the correct password
 
-        btnStart.setOnClickListener(v -> {
-            String s = inputMinutes.getText().toString().trim();
-            if (s.isEmpty()) {
-                Toast.makeText(this, "Enter minutes", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            int mins;
-            try {
-                mins = Integer.parseInt(s);
-                if (mins <= 0) throw new NumberFormatException();
-            } catch (NumberFormatException e) {
-                Toast.makeText(this, "Invalid minutes", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            Intent intent = new Intent(MainActivity.this, FocusActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            intent.putExtra("minutes", mins);
-            intent.putExtra("duration", mins * 60 * 1000L);
-            startActivity(intent);
-        });
+🕒 4. Start Focus Later (Scheduled Mode)
+User chooses:
+-Delay (in minutes)
+-Focus Duration
+-The app uses AlarmManager to trigger a Foreground Service even if:
+   ~The app is closed
+   ~The app is killed
+   ~The screen is off
+-At the scheduled time:
+   ✔ The app launches the FocusActivity in the foreground
+   ✔ Screen pinning starts automatically
 
-        btnHistory.setOnClickListener(v -> startActivity(new Intent(this, HistoryActivity.class)));
-    }
-}
+🛡️ 5. Emergency Stop (Password Protected)
+-If the user attempts to stop the focus session:
+    ~A password prompt appears
+    ~Only the correct password stops the session
+-If the wrong password is entered:
+     ~A warning toast appears
+     ~Screen remains locked
 
+🏆 6. Rewards System
+-Every completed focus session earns points.
+-Users can open the Rewards screen, where colorful cards show:
+     ~Completed Sessions
+     ~Points Earned
+     ~Level Progression
+
+📲 7. Device Unlock Repinning
+-If the user:
+Locks the phone,Unlocks the phone again.The focus screen is automatically re-pinned using UnlockReceiver.
+
+🧱 Project Architecture
+/app
+ ├── java/com.example.dailydoc
+ │    ├── LoginActivity.java
+ │    ├── HomeActivity.java
+ │    ├── FocusActivity.java
+ │    ├── ChangePasswordActivity.java
+ │    ├── RewardsActivity.java
+ │    ├── StartFocusScheduler.java
+ │    ├── StartFocusReceiver.java
+ │    ├── FocusStartService.java
+ │    └── UnlockReceiver.java
+ │
+ └── res/layout
+      ├── activity_login.xml
+      ├── activity_home.xml
+      ├── activity_focus.xml
+      ├── activity_rewards.xml
+      └── activity_change_password.xml
+
+⚙️ Technical Concepts Used
+✔ Screen Pinning
+
+Prevents navigation away from the focus screen.
+
+✔ Foreground Service
+
+Needed to start focus mode from the background (Android 13–15 compliant).
+
+✔ AlarmManager + PendingIntent
+
+Allows scheduled sessions to trigger after minutes/hours.
+
+✔ SharedPreferences
+-Stores:
+  ~Username
+  ~Password
+  ~Rewards/Points
+
+✔ BroadcastReceiver
+-Detects:
+   ~Alarms
+   ~Device unlock events
+
+📥 How to Build & Run
+-Clone the project
+-Open in Android Studio
+-Sync Gradle
+-Run on real device or emulator
+-Grant required permissions:
+    ~Foreground service
+    ~Exact alarm permission (if needed)
+
+🔮 Future Improvements
+-Cloud backup of sessions
+-App usage analytics
+-Pomodoro insights
+-Themes & dark mode
